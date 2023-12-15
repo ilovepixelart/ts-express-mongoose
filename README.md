@@ -17,7 +17,7 @@ Autogenerate REST api for your mongoose models
 
 ## Motivation
 
-ts-express-mongoose is an express middleware that allows you to autogenerate REST api for your mongoose models. It's a great tool for prototyping and development.
+ts-express-mongoose is an express middleware that allows you to autogenerate REST api for your mongoose models. It's a great tool for fast prototyping and development.
 
 ## Supports and tested with
 
