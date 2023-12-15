@@ -1,0 +1,46 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "[javascript]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[typescript]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "eslint.options": {
+    "extensions": [
+      ".js",
+      ".ts"
+    ]
+  },
+  "eslint.validate": [
+    "javascript",
+    "typescript"
+  ],
+  "cSpell.words": [
+    "autosync",
+    "dbaeumer",
+    "Dsonar",
+    "ilovepixelart",
+    "lcov",
+    "linebreak",
+    "nargs",
+    "nodenext",
+    "nosql",
+    "npmignore",
+    "parens",
+    "singleline",
+    "sonarcloud",
+    "sonarjs",
+    "sonarsource",
+    "swcrc",
+    "virtuals"
+  ],
+  "sonarlint.connectedMode.project": {
+    "connectionId": "ilovepixelart",
+    "projectKey": "ilovepixelart_ts-express-mongoose"
+  }
+}
