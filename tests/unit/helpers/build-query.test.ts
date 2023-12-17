@@ -80,7 +80,7 @@ describe('buildQuery', () => {
       expect(result).toEqual(query)
     })
 
-    it('calls limit and returns a query object', async () => {
+    it('calls limit and returns a query object options.limit 1 and queryOptions.limit "2"', async () => {
       const options = {
         limit: 1
       }
@@ -116,7 +116,7 @@ describe('buildQuery', () => {
       expect(result).toEqual(query)
     })
 
-    it('does not call limit on count endpoint and returns a query object', async () => {
+    it('does not call limit on count endpoint and returns a query object options.limit 1 and queryOptions.limit "2"', async () => {
       const options = {
         limit: 1
       }
