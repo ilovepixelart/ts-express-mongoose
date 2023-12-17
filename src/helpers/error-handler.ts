@@ -6,7 +6,8 @@ import type { HttpError } from 'http-errors'
 
 export function getErrorHandler(options: Pick<Options, 'idProperty' | 'onError'>): ErrorRequestHandler {
   const fn: ErrorRequestHandler = function errorHandler(err: HttpError, req, res, next) {
-    if (err.message === STATUS_CODES[404] || (req.params['id'] && err['path'] === options.idProperty && err.name === 'CastError')) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (err.message === STATUS_CODES[404] || (req.params?.['id'] && err['path'] === options.idProperty && err.name === 'CastError')) {
       req.erm.statusCode = 404
     } else {
       req.erm.statusCode = req.erm.statusCode && req.erm.statusCode >= 400
