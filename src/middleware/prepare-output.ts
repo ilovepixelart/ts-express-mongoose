@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+
 import type { RequestHandler } from 'express'
 import { getErrorHandler } from '../helpers/error-handler'
 import type { Filter } from '../helpers/resource-filter'
