@@ -1,6 +1,6 @@
 {
   "name": "ts-express-mongoose",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Auto Generate REST api for your mongoose models in Express",
   "author": "Alex Eagle",
   "license": "MIT",
