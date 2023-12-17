@@ -27,7 +27,7 @@ export function getPrepareOutputHandler(
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   const fn: RequestHandler = function prepareOutput(req, res, next): void {
-    const postMiddleware = (() => {
+    const postMiddleware = ((): (RequestHandler | undefined)[] => {
       switch (req.method.toLowerCase()) {
       case 'get': {
         return Array.isArray(options.postRead)
