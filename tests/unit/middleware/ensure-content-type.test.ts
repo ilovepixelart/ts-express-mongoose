@@ -1,5 +1,6 @@
-import type { ErrorRequestHandler, Request, Response } from 'express'
 import { getEnsureContentTypeHandler } from '../../../src/middleware/ensure-content-type'
+
+import type { ErrorRequestHandler, Request, Response } from 'express'
 
 interface RequestData {
   erm?: Record<string, unknown>;
