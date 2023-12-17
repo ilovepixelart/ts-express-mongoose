@@ -52,7 +52,7 @@ export interface Options {
   preUpdate: RequestHandler | RequestHandler[]
   preDelete: RequestHandler | RequestHandler[]
   access?: (req: Request) => Access | Promise<Access>
-  contextFilter: (model: Model<unknown>, req: Request, done: (query: Model<unknown> | Query<unknown, unknown>) => void) => void
+  contextFilter: <T, R>(model: Model<T>, req: Request, done: (query: Model<T> | Query<R, T>) => void) => void
   postCreate?: RequestHandler | RequestHandler[]
   postRead?: RequestHandler | RequestHandler[]
   postUpdate?: RequestHandler | RequestHandler[]
