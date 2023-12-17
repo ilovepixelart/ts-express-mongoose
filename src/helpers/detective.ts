@@ -42,7 +42,8 @@ export function detective<T>(model: Model<T>, path: string): string | undefined 
     schemaPathObj = schema.path(schemaLast) ?? schema.path(schemaPathStr)
   }
 
-  if (!schemaPathObj && (!model.discriminators)) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (!schemaPathObj && (!model?.discriminators)) {
     return undefined
   }
 
