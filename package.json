@@ -19,7 +19,6 @@
     "REST",
     "API",
     "express",
-    "restify",
     "mongodb",
     "mongoose",
     "model",
