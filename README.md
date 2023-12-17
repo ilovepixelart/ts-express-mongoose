@@ -1,6 +1,6 @@
 # ts-express-mongoose
 
-Autogenerate REST api for your mongoose models
+Auto Generate REST api for your mongoose models in Express
 
 [![npm](https://img.shields.io/npm/v/ts-express-mongoose)](https://www.npmjs.com/package/ts-express-mongoose)
 [![npm](https://img.shields.io/npm/dt/ts-express-mongoose)](https://www.npmjs.com/package/ts-express-mongoose)
@@ -31,7 +31,7 @@ ts-express-mongoose is an express middleware that allows you to autogenerate RES
 
 ## Features
 
-- [x] Autogenerate REST api for your mongoose models
+- [x] Auto Generate REST api for your mongoose models in Express
 
 ## Installation
 
