@@ -51,7 +51,7 @@ export interface Options {
   preRead: RequestHandler | RequestHandler[]
   preUpdate: RequestHandler | RequestHandler[]
   preDelete: RequestHandler | RequestHandler[]
-  access?: (req: Request) => Access | Promise<Access>
+  access?: (req: Request) => Promise<Access>
   contextFilter: <T, R>(model: Model<T>, req: Request, done: (query: Model<T> | Query<R, T>) => void) => void
   postCreate?: RequestHandler | RequestHandler[]
   postRead?: RequestHandler | RequestHandler[]

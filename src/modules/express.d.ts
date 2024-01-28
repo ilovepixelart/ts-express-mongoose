@@ -5,7 +5,7 @@ import type { Access } from '../types'
 declare global {
   namespace Express {
     export interface Request {
-      access: Access | Promise<Access>
+      access: Access
       erm: {
         document?: Document
         model?: Model<unknown>

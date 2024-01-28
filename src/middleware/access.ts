@@ -15,35 +15,20 @@ export function getAccessHandler(options: Required<Pick<Options, 'access' | 'idP
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const fn: RequestHandler = async function access(req, res, next): Promise<void> {
-    const handler = function (access: Access | Promise<Access>): void {
+    const handler = function (access: Access): void {
       req.access = access
       next()
     }
 
-    let result: Access | Promise<Access>
+    let access: Access | undefined
 
     try {
-      result = options.access(req)
+      access = await options.access(req)
+      accessCheck(access)
+      handler(access)
     } catch (err) {
       errorHandler(err, req, res, next)
       return
-    }
-    
-    if (result instanceof Promise) {
-      try {
-        const access = await result
-        accessCheck(access)
-        handler(access)
-      } catch (err) {
-        errorHandler(err, req, res, next)
-      }
-    } else {
-      try {
-        accessCheck(result)
-        handler(result)
-      } catch (err) {
-        errorHandler(err, req, res, next)
-      }
     }
   }
 

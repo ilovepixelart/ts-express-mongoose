@@ -54,7 +54,7 @@ export class Filter {
     options: {
         access: Access
         modelName: string
-        populate?: Exclude<QueryOptions['populate'], string>
+        populate: Exclude<QueryOptions['populate'], string> | string
       }
   ): Record<string, unknown> | Record<string, unknown>[] {
     const excluded = this.getExcluded({
@@ -65,6 +65,11 @@ export class Filter {
     const filtered = this.filterItem(resource, excluded)
   
     if (options.populate) {
+      if (typeof options.populate === 'string') {
+        options.populate = [{ path: options.populate }] as Exclude<QueryOptions['populate'], string>
+      }
+
+
       this.filterPopulatedItem(filtered, {
         access: options.access,
         modelName: options.modelName,
@@ -110,14 +115,14 @@ export class Filter {
     options: {
       access: Access
       modelName: string
-      populate: Exclude<QueryOptions['populate'], undefined | string>
+      populate: Exclude<QueryOptions['populate'], string>
     }
   ): T {
     if (Array.isArray(item)) {
       return item.map((i) => this.filterPopulatedItem(i, options)) as T
     }
 
-    for (const populate of options.populate) {
+    for (const populate of options.populate ?? []) {
       if (!populate.path) {
         continue
       }

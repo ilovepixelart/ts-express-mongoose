@@ -70,7 +70,7 @@ export function getPrepareOutputHandler(
         req.erm.result = filter.filterObject(req.erm.result, {
           access: req.access,
           modelName,
-          populate: req.erm.query?.populate
+          populate: req.erm.query?.populate ?? []
         })
       }
 
