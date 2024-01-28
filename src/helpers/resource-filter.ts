@@ -109,7 +109,6 @@ export class Filter {
   /**
    * Removes excluded keys from a document with populated sub documents.
    */
-  // eslint-disable-next-line sonarjs/cognitive-complexity
   private filterPopulatedItem<T extends Record<string, unknown> | Record<string, unknown>[]>(
     item: T,
     options: {
@@ -121,42 +120,72 @@ export class Filter {
     if (Array.isArray(item)) {
       return item.map((i) => this.filterPopulatedItem(i, options)) as T
     }
-
+  
     for (const populate of options.populate ?? []) {
-      if (!populate.path) {
-        continue
-      }
-    
-      const model = this.excludedMap.get(options.modelName)?.model
-    
-      if (!model) {
-        continue
-      }
-    
-      const excluded = this.getExcluded({
-        access: options.access,
-        modelName: detective(model, populate.path) ?? ''
-      })
-    
-      if (has(item, populate.path)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        this.filterItem(get(item, populate.path) as T, excluded)
-      } else {
-        const pathToArray = populate.path.split('.').slice(0, -1).join('.')
-    
-        if (has(item, pathToArray)) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-          const array = get(item, pathToArray)
-          const pathToObject = populate.path.split('.').slice(-1).join('.')
-    
-          if (Array.isArray(array)) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
-            this.filterItem(array.map((element) => get(element, pathToObject)), excluded)
-          }
-        }
+      this.handlePopulate(populate, item, options)
+    }
+  
+    return item
+  }
+  
+  private handlePopulate<T extends Record<string, unknown> | Record<string, unknown>[]>(
+    populate: {
+      path: string
+      strictPopulate: boolean
+      match?: Record<string, unknown> | undefined
+      options?: Record<string, unknown> | undefined
+      select?: string | undefined
+    },
+    item: T,
+    options: {
+      access: Access
+      modelName: string
+    }
+  ): void {
+    if (!populate.path) {
+      return
+    }
+  
+    const model = this.excludedMap.get(options.modelName)?.model
+  
+    if (!model) {
+      return
+    }
+  
+    const excluded = this.getExcluded({
+      access: options.access,
+      modelName: detective(model, populate.path) ?? ''
+    })
+  
+    if (has(item, populate.path)) {
+      this.filterItem(get(item, populate.path) as T, excluded)
+    } else {
+      this.handlePathToArray(populate, item, excluded)
+    }
+  }
+  
+  private handlePathToArray<T extends Record<string, unknown> | Record<string, unknown>[]>(
+    populate: {
+      path: string
+      strictPopulate: boolean
+      match?: Record<string, unknown> | undefined
+      options?: Record<string, unknown> | undefined
+      select?: string | undefined
+    },
+    item: T,
+    excluded: string[]
+  ): void {
+    const pathToArray = populate.path.split('.').slice(0, -1).join('.')
+  
+    if (has(item, pathToArray)) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const array = get(item, pathToArray)
+      const pathToObject = populate.path.split('.').slice(-1).join('.')
+  
+      if (Array.isArray(array)) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        this.filterItem(array.map((element) => get(element, pathToObject)), excluded)
       }
     }
-
-    return item
   }
 }
