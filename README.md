@@ -23,7 +23,7 @@ ts-express-mongoose is an express middleware that allows you to autogenerate RES
 
 ```json
 {
-  "node": "16.x || 18.x || 20.x",
+  "node": "18.x || 20.x",
   "mongoose": "6.6.x || 7.x || 8.x",
   "express": "4.x"
 }
