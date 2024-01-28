@@ -109,7 +109,7 @@ export function getPrepareOutputHandler(
         await acc
 
         return new Promise((resolve, reject) => {
-          middleware(req, res, (err) => { err ? reject(err) : resolve(err) })
+          middleware(req, res, (err) => { err ? reject(err as Error) : resolve(err) })
         })
       }, Promise.resolve())
       .then(callback)
