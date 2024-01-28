@@ -155,7 +155,7 @@ export default function () {
     }
 
     if (opts.connect) {
-      const uri = process.env.MONGO_URL || 'mongodb://localhost/database'
+      const uri = process.env.MONGO_URL ?? 'mongodb://localhost/database'
       mongoose.connect(uri).then(function () {
         callback()
       })

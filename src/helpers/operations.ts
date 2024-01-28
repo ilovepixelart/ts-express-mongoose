@@ -221,7 +221,7 @@ export function operations(
   const createObject: RequestHandler = function (req, res, next) {
     const contextModel = model
 
-    req.body = filter.filterObject(req.body || {}, {
+    req.body = filter.filterObject(req.body ?? {}, {
       access: req.access,
       modelName: model.modelName,
       populate: req.erm.query?.populate
@@ -253,7 +253,7 @@ export function operations(
   const modifyObject: RequestHandler = function (req, res, next) {
     const contextModel = model
 
-    req.body = filter.filterObject(req.body || {}, {
+    req.body = filter.filterObject(req.body ?? {}, {
       access: req.access,
       modelName: model.modelName,
       populate: req.erm.query?.populate

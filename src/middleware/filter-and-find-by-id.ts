@@ -27,7 +27,7 @@ export function getFilterAndFindByIdHandler <T>(options: Pick<Options, 'contextF
         .findOne()
         .and({ [options.idProperty]: req.params['id'] })
         .lean(false)
-        .read(options.readPreference || 'p')
+        .read(options.readPreference ?? 'p')
         .exec()
         .then((doc: Document | null) => {
           if (!doc) {
