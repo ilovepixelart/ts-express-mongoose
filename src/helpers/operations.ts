@@ -16,7 +16,7 @@ import { getBuildQuery } from './build-query'
 import { getErrorHandler } from './error-handler'
 import { moreDots } from './more-dots'
 
-import type { Request, RequestHandler } from 'express'
+import type { NextFunction, Request, RequestHandler } from 'express'
 import type { Model} from 'mongoose'
 import type { Filter } from './resource-filter'
 import type { Options } from '../types'
@@ -249,6 +249,115 @@ export function operations(
       .catch((err) => { errorHandler(err, req, res, next) })
   }
 
+  const handleArrayValue = (key: string, value: unknown, dst: Record<string, unknown>) => {
+    for (const item of value) {
+      if (typeof item === 'object') {
+        dst[key] = dst[key] ?? [] as unknown[]
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        dst[key].push((item as { _id: unknown })._id)
+      }
+    }
+  }
+  
+  const handleObjectValue = (key: string, value: unknown, dst: Record<string, unknown>) => {
+    dst[key] = (value as { _id: unknown })._id
+  }
+  
+  const handlePlainObjectValue = (key: string, value: unknown, dst: Record<string, unknown>, path: unknown, contextModel: Model<unknown>) => {
+    if (path && path.instance === 'ObjectID') {
+      dst[key] = (value as { _id: unknown })._id
+    } else {
+      dst[key] = depopulate(value, contextModel)
+    }
+  }
+  
+  const depopulate = (src: Record<string, unknown>, contextModel: Model<unknown>) => {
+    const dst: Record<string, unknown> = {}
+  
+    for (const [key, value] of Object.entries(src)) {
+      const path = contextModel.schema.path(key)
+  
+      if (path.caster && path.caster.instance === 'ObjectID') {
+        if (Array.isArray(value)) {
+          handleArrayValue(key, value, dst)
+        } else if (isPlainObject(value)) {
+          handleObjectValue(key, value, dst)
+        }
+      } else if (isPlainObject(value)) {
+        handlePlainObjectValue(key, value, dst, path, contextModel)
+      }
+  
+      if (typeof dst[key] === 'undefined') {
+        dst[key] = value
+      }
+    }
+  
+    return dst
+  }
+
+  const findOneAndUpdateOption = function (
+    req: Request, 
+    res: Response, 
+    next: NextFunction, 
+    cleanBody: Record<string, T>,
+    contextModel: Model<T>
+  ) {
+    options.contextFilter(contextModel, req, (filteredContext) => {
+      findById(filteredContext, req.params.id)
+        .findOneAndUpdate(
+          {},
+          {
+            $set: cleanBody
+          },
+          {
+            new: true,
+            upsert: options.upsert,
+            runValidators: options.runValidators
+          }
+        )
+        .exec()
+        .then((item) => {
+          return contextModel.populate(item, req.erm.query?.populate ?? [])
+        })
+        .then((item) => {
+          if (!item) {
+            errorHandler(new Error(STATUS_CODES[404]), req, res, next); return
+          }
+  
+          req.erm.result = item as unknown as Record<string, unknown>
+          req.erm.statusCode = 200
+  
+          next()
+        })
+        .catch((err) => { errorHandler(err, req, res, next) })
+    })
+  }
+  
+  const saveOption = function (
+    req: Request, 
+    res: Response, 
+    next: NextFunction, 
+    cleanBody: Record<string, T>, // Replace with the actual type of cleanBody
+    contextModel: Model<T> // Replace with the actual type of contextModel
+  ) {
+    for (const [key, value] of Object.entries(cleanBody)) {
+      req.erm.document?.set(key, value)
+    }
+  
+    req.erm.document
+      ?.save()
+      .then((item) => {
+        return contextModel.populate(item, req.erm.query?.populate ?? [])
+      })
+      .then((item) => {
+        req.erm.result = item as unknown as Record<string, unknown>
+        req.erm.statusCode = 200
+  
+        next()
+      })
+      .catch((err: Error) => { errorHandler(err, req, res, next) })
+  }
+
   // eslint-disable-next-line sonarjs/cognitive-complexity
   const modifyObject: RequestHandler = function (req, res, next) {
     const contextModel = model
@@ -265,89 +374,12 @@ export function operations(
       delete req.body[contextModel.schema.options.versionKey]
     }
 
-    function depopulate(src: Record<string, unknown>) {
-      const dst: Record<string, unknown> = {}
-
-      for (const [key, value] of Object.entries(src)) {
-        const path = contextModel.schema.path(key)
-
-        if (path.caster && path.caster.instance === 'ObjectID') {
-          if (Array.isArray(value)) {
-            for (const item of value) {
-              if (typeof item === 'object') {
-                dst[key] = dst[key] ?? []
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                dst[key].push((item as { _id: unknown })._id)
-              }
-            }
-          } else if (isPlainObject(value)) {
-            dst[key] = (value as { _id: unknown })._id
-          }
-        } else if (isPlainObject(value)) {
-          if (path && path.instance === 'ObjectID') {
-            dst[key] = (value as { _id: unknown })._id
-          } else {
-            dst[key] = depopulate(value)
-          }
-        }
-
-        if (typeof dst[key] === 'undefined') {
-          dst[key] = value
-        }
-      }
-
-      return dst
-    }
-
     const cleanBody = moreDots(depopulate(req.body))
 
     if (options.findOneAndUpdate) {
-      options.contextFilter(contextModel, req, (filteredContext) => {
-        findById(filteredContext, req.params.id)
-          .findOneAndUpdate(
-            {},
-            {
-              $set: cleanBody
-            },
-            {
-              new: true,
-              upsert: options.upsert,
-              runValidators: options.runValidators
-            }
-          )
-          .exec()
-          .then((item) => {
-            return contextModel.populate(item, req.erm.query?.populate ?? [])
-          })
-          .then((item) => {
-            if (!item) {
-              errorHandler(new Error(STATUS_CODES[404]), req, res, next); return
-            }
-
-            req.erm.result = item as unknown as Record<string, unknown>
-            req.erm.statusCode = 200
-
-            next()
-          })
-          .catch((err) => { errorHandler(err, req, res, next) })
-      })
+      findOneAndUpdateOption(req, res, next, cleanBody, contextModel)
     } else {
-      for (const [key, value] of Object.entries(cleanBody)) {
-        req.erm.document?.set(key, value)
-      }
-
-      req.erm.document
-        ?.save()
-        .then((item) => {
-          return contextModel.populate(item, req.erm.query?.populate ?? [])
-        })
-        .then((item) => {
-          req.erm.result = item as unknown as Record<string, unknown>
-          req.erm.statusCode = 200
-
-          next()
-        })
-        .catch((err: Error) => { errorHandler(err, req, res, next) })
+      saveOption(req, res, next, cleanBody, contextModel)
     }
   }
 
