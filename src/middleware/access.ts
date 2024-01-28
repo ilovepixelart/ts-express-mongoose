@@ -20,15 +20,30 @@ export function getAccessHandler(options: Required<Pick<Options, 'access' | 'idP
       next()
     }
 
-    let access: Access | undefined
+    let result: Access | Promise<Access>
 
     try {
-      access = await options.access(req)
-      accessCheck(access)
-      handler(access)
+      result = options.access(req)
     } catch (err) {
       errorHandler(err, req, res, next)
       return
+    }
+    
+    if (result instanceof Promise) {
+      try {
+        const access = await result
+        accessCheck(access)
+        handler(access)
+      } catch (err) {
+        errorHandler(err, req, res, next)
+      }
+    } else {
+      try {
+        accessCheck(result)
+        handler(result)
+      } catch (err) {
+        errorHandler(err, req, res, next)
+      }
     }
   }
 
